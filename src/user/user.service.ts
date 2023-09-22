@@ -42,4 +42,15 @@ export class UserService {
   async remove(user_uuid: string) {
     return this.userRepository.delete(user_uuid);
   }
+
+  async authFindUser(auth_id: string) {
+    return this.userRepository.findOne({
+      relations: { userAuth: true },
+      where: {
+        userAuth: {
+          auth_id: auth_id,
+        },
+      },
+    });
+  }
 }
