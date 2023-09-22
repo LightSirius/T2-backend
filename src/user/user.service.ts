@@ -4,6 +4,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { UserAuth } from './entities/user-auth.entity';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,13 @@ export class UserService {
     private readonly entityManager: EntityManager,
   ) {}
   async create(createUserDto: CreateUserDto) {
-    const user = new User(createUserDto);
+    const userAuth = new UserAuth({
+      ...createUserDto.userAuth,
+    });
+    const user = new User({
+      ...createUserDto,
+      userAuth,
+    });
     await this.entityManager.save(user);
   }
 
@@ -34,5 +41,16 @@ export class UserService {
 
   async remove(user_uuid: string) {
     return this.userRepository.delete(user_uuid);
+  }
+
+  async authFindUser(auth_id: string) {
+    return this.userRepository.findOne({
+      relations: { userAuth: true },
+      where: {
+        userAuth: {
+          auth_id: auth_id,
+        },
+      },
+    });
   }
 }

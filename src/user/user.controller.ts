@@ -10,10 +10,14 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('create')
   async create(@Body() createUserDto: CreateUserDto) {
@@ -41,5 +45,10 @@ export class UserController {
   @Delete(':user_uuid')
   async remove(@Param('user_uuid') user_uuid: string) {
     return this.userService.remove(user_uuid);
+  }
+
+  @Post('test')
+  async test(@Body() body: any) {
+    return this.authService.validateUser(body.auth_id, body.auth_password);
   }
 }
