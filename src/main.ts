@@ -9,6 +9,10 @@ async function bootstrap() {
     .setTitle('T2 Project API')
     .setDescription('T2 Backend API List')
     .setVersion('0.0.1')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'Token' },
+      'access-token',
+    )
     .build();
   const swagger_document = SwaggerModule.createDocument(app, swagger_config);
   SwaggerModule.setup('api-list', app, swagger_document);
