@@ -11,6 +11,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserAuth)
+    private authRepository: Repository<UserAuth>,
     private readonly entityManager: EntityManager,
   ) {}
   async create(createUserDto: CreateUserDto) {
@@ -32,6 +34,13 @@ export class UserService {
     return this.userRepository.findOneBy({ user_uuid });
   }
 
+  async findOneWithAuth(user_uuid: string) {
+    return this.userRepository.findOne({
+      where: { user_uuid },
+      relations: { userAuth: true },
+    });
+  }
+
   async update(user_uuid: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOneBy({ user_uuid });
     user.user_id = updateUserDto.user_id;
@@ -40,7 +49,8 @@ export class UserService {
   }
 
   async remove(user_uuid: string) {
-    return this.userRepository.delete(user_uuid);
+    const user = await this.findOneWithAuth(user_uuid);
+    return this.authRepository.delete(user.userAuth.uuid);
   }
 
   async authFindUser(auth_id: string) {
