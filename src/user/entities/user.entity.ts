@@ -22,7 +22,7 @@ export class User {
   @Column()
   user_email: string;
 
-  @OneToOne(() => UserAuth, { cascade: true })
+  @OneToOne(() => UserAuth, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn()
   userAuth: UserAuth;
 }
