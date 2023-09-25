@@ -35,6 +35,7 @@ COPY package.json ./
 COPY tsconfig.json ./
 COPY tsconfig.build.json ./
 COPY .eslintrc.js ./
+COPY .env ./
 
 # npm install
 RUN npm install
