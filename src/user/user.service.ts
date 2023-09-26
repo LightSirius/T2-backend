@@ -44,8 +44,18 @@ export class UserService {
 
   async update(user_uuid: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOneBy({ user_uuid });
-    user.user_id = updateUserDto.user_id;
-    user.user_email = updateUserDto.user_email;
+    user.user_name = updateUserDto.user_name
+      ? updateUserDto.user_name
+      : user.user_name;
+    user.user_email = updateUserDto.user_email
+      ? updateUserDto.user_email
+      : user.user_email;
+    user.user_born = updateUserDto.user_born
+      ? updateUserDto.user_born
+      : user.user_born;
+    user.user_gender = updateUserDto.user_gender
+      ? updateUserDto.user_gender
+      : user.user_gender;
     return await this.entityManager.save(user);
   }
 
