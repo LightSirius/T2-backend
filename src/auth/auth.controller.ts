@@ -18,8 +18,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async login(@Request() req, @Body() loginAuthDto: LoginAuthDto) {
+  async login(
+    @Request() req,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Body() loginAuthDto: LoginAuthDto,
+  ): Promise<{ access_token: string }> {
     return this.authService.login(req.user);
   }
 
