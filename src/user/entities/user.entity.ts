@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserAuth } from './user-auth.entity';
 
@@ -21,6 +23,12 @@ export class User {
 
   @Column()
   user_email: string;
+
+  @CreateDateColumn()
+  create_date: Date;
+
+  @UpdateDateColumn()
+  update_date: Date;
 
   @OneToOne(() => UserAuth, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn()
