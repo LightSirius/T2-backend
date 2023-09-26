@@ -10,7 +10,11 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 
+@ApiTags('User API')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -21,12 +25,12 @@ export class UserController {
   }
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get(':user_uuid')
-  async findOne(@Param('user_uuid') user_uuid: string) {
+  async findOne(@Param('user_uuid') user_uuid: string): Promise<User> {
     return this.userService.findOne(user_uuid);
   }
 
@@ -34,12 +38,12 @@ export class UserController {
   async update(
     @Param('user_uuid') user_uuid: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<User> {
     return this.userService.update(user_uuid, updateUserDto);
   }
 
   @Delete(':user_uuid')
-  async remove(@Param('user_uuid') user_uuid: string) {
+  async remove(@Param('user_uuid') user_uuid: string): Promise<DeleteResult> {
     return this.userService.remove(user_uuid);
   }
 }

@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class UserAuth {
@@ -14,4 +20,10 @@ export class UserAuth {
 
   @Column()
   auth_password: string;
+
+  @CreateDateColumn()
+  create_date: Date;
+
+  @UpdateDateColumn()
+  update_date: Date;
 }
