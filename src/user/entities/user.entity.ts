@@ -9,6 +9,12 @@ import {
 } from 'typeorm';
 import { UserAuth } from './user-auth.entity';
 
+export enum UserGender {
+  a = 'a',
+  b = 'b',
+  c = 'c',
+}
+
 @Entity()
 export class User {
   constructor(user: Partial<User>) {
@@ -19,10 +25,16 @@ export class User {
   user_uuid: string;
 
   @Column()
-  user_id: string;
+  user_name: string;
 
   @Column()
   user_email: string;
+
+  @Column()
+  user_born: Date;
+
+  @Column({ type: 'enum', enum: UserGender, default: UserGender.c })
+  user_gender: UserGender;
 
   @CreateDateColumn()
   create_date: Date;
