@@ -6,6 +6,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserAuth } from './entities/user-auth.entity';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
+import { encodePassword } from '../utils/bcrypt';
+import { CreateUserAuthDto } from './dto/create-user-auth.dto';
 
 @Injectable()
 export class UserService {
@@ -17,6 +19,9 @@ export class UserService {
     private readonly entityManager: EntityManager,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    createUserDto.userAuth.auth_password = await encodePassword(
+      createUserDto.userAuth.auth_password,
+    );
     const userAuth = new UserAuth({
       ...createUserDto.userAuth,
     });
@@ -24,6 +29,7 @@ export class UserService {
       ...createUserDto,
       userAuth,
     });
+    console.log(user);
     await this.entityManager.save(user);
   }
 
