@@ -3,8 +3,8 @@ import { check } from 'k6';
 
 import { htmlReport } from 'https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js';
 
-const VUS = 500;
-const DURATION = '5s';
+const VUS = 1000;
+const DURATION = '30s';
 
 export const options = {
   vus: VUS,
