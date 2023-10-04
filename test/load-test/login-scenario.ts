@@ -1,3 +1,4 @@
+//** k6 run .\login-scenario.ts --out influxdb=http://localhost:8086/myk6db
 import http from 'k6/http';
 import { check } from 'k6';
 
