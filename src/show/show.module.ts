@@ -4,6 +4,6 @@ import { ShowService } from './show.service';
 
 @Module({
   controllers: [ShowController],
-  providers: [ShowService]
+  providers: [ShowService],
 })
 export class ShowModule {}
