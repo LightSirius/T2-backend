@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ShowController } from './show.controller';
 
-@Module({})
+@Module({
+  controllers: [ShowController]
+})
 export class ShowModule {}
