@@ -56,7 +56,21 @@ services:
       dockerfile: Dockerfile
     container_name: redis-predixy
     hostname: predixy
+    depends_on:
+      redis-node01:
+        condition: service_started
+      redis-node02:
+        condition: service_started
+      redis-node03:
+        condition: service_started
+      redis-node04:
+        condition: service_started
+      redis-node05:
+        condition: service_started
+      redis-node06:
+        condition: service_started
     volumes:
       - ./redis/predixy/conf:/etc/predixy/conf
+
     ports:
       - "7500:7500"
