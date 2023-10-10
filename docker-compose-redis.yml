@@ -8,7 +8,7 @@ services:
       - ./redis/redis-node-01.conf:/etc/redis-node-01.conf
     command: redis-server /etc/redis-node-01.conf
     ports:
-      - "127.0.0.1:7101:7101"
+      - "7101:7101"
   redis-node02:
     image: redis:latest
     container_name: redis-node02
@@ -16,7 +16,7 @@ services:
       - ./redis/redis-node-02.conf:/etc/redis-node-02.conf
     command: redis-server /etc/redis-node-02.conf
     ports:
-      - "127.0.0.1:7102:7102"
+      - "7102:7102"
   redis-node03:
     image: redis:latest
     container_name: redis-node03
@@ -24,7 +24,7 @@ services:
       - ./redis/redis-node-03.conf:/etc/redis-node-03.conf
     command: redis-server /etc/redis-node-03.conf
     ports:
-      - "127.0.0.1:7103:7103"
+      - "7103:7103"
   redis-node04:
     image: redis:latest
     container_name: redis-node04
@@ -32,7 +32,7 @@ services:
       - ./redis/redis-node-04.conf:/etc/redis-node-04.conf
     command: redis-server /etc/redis-node-04.conf
     ports:
-      - "127.0.0.1:7104:7104"
+      - "7104:7104"
   redis-node05:
     image: redis:latest
     container_name: redis-node05
@@ -40,7 +40,7 @@ services:
       - ./redis/redis-node-05.conf:/etc/redis-node-05.conf
     command: redis-server /etc/redis-node-05.conf
     ports:
-      - "127.0.0.1:7105:7105"
+      - "7105:7105"
   redis-node06:
     image: redis:latest
     container_name: redis-node06
@@ -48,15 +48,15 @@ services:
       - ./redis/redis-node-06.conf:/etc/redis-node-06.conf
     command: redis-server /etc/redis-node-06.conf
     ports:
-      - "127.0.0.1:7106:7106"
+      - "7106:7106"
 
   predixy:
-    image: hanndol/predixy
     build:
-      context: predixy/
+      context: ./redis/predixy
+      dockerfile: Dockerfile
     container_name: redis-predixy
     hostname: predixy
     volumes:
-      - ./predixy/conf:/etc/predixy/conf
+      - ./redis/predixy/conf:/etc/predixy/conf
     ports:
-      - "127.0.0.1:7500:7500"
+      - "7500:7500"
