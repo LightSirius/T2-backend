@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ShowModule } from './show/show.module';
 import { TicketModule } from './ticket/ticket.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { TicketModule } from './ticket/ticket.module';
     AuthModule,
     ShowModule,
     TicketModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
