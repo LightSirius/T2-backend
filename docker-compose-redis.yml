@@ -71,6 +71,5 @@ services:
         condition: service_started
     volumes:
       - ./redis/predixy/conf:/etc/predixy/conf
-
     ports:
       - "7500:7500"
