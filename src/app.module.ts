@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ShowModule } from './show/show.module';
 import { TicketModule } from './ticket/ticket.module';
 import { RedisModule } from './redis/redis.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RedisModule } from './redis/redis.module';
     ShowModule,
     TicketModule,
     RedisModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
