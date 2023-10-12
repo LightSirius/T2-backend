@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  redis-node01:
+    image: redis:latest
+    container_name: redis-node01
+    volumes:
+      - ./redis/redis-node-01.conf:/etc/redis-node-01.conf
+    command: redis-server /etc/redis-node-01.conf
+    ports:
+      - "7101:7101"
+  redis-node02:
+    image: redis:latest
+    container_name: redis-node02
+    volumes:
+      - ./redis/redis-node-02.conf:/etc/redis-node-02.conf
+    command: redis-server /etc/redis-node-02.conf
+    ports:
+      - "7102:7102"
+  redis-node03:
+    image: redis:latest
+    container_name: redis-node03
+    volumes:
+      - ./redis/redis-node-03.conf:/etc/redis-node-03.conf
+    command: redis-server /etc/redis-node-03.conf
+    ports:
+      - "7103:7103"
+  redis-node04:
+    image: redis:latest
+    container_name: redis-node04
+    volumes:
+      - ./redis/redis-node-04.conf:/etc/redis-node-04.conf
+    command: redis-server /etc/redis-node-04.conf
+    ports:
+      - "7104:7104"
+  redis-node05:
+    image: redis:latest
+    container_name: redis-node05
+    volumes:
+      - ./redis/redis-node-05.conf:/etc/redis-node-05.conf
+    command: redis-server /etc/redis-node-05.conf
+    ports:
+      - "7105:7105"
+  redis-node06:
+    image: redis:latest
+    container_name: redis-node06
+    volumes:
+      - ./redis/redis-node-06.conf:/etc/redis-node-06.conf
+    command: redis-server /etc/redis-node-06.conf
+    ports:
+      - "7106:7106"
+
+  predixy:
+    build:
+      context: ./redis/predixy
+      dockerfile: Dockerfile
+    container_name: redis-predixy
+    hostname: predixy
+    depends_on:
+      redis-node01:
+        condition: service_started
+      redis-node02:
+        condition: service_started
+      redis-node03:
+        condition: service_started
+      redis-node04:
+        condition: service_started
+      redis-node05:
+        condition: service_started
+      redis-node06:
+        condition: service_started
+    volumes:
+      - ./redis/predixy/conf:/etc/predixy/conf
+    ports:
+      - "7500:7500"

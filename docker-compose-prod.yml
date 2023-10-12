@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  app-prod:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-prod
+    environment:
+      - DB_HOST=${GCP_DB_HOST}
+      - DB_PORT=5432
+      - DB_NAME=${GCP_DB_NAME}
+      - DB_USERNAME=${GCP_DB_USERNAME}
+      - DB_PASSWORD=${GCP_DB_PASSWORD}
+    ports:
+      - "3000:3000"
