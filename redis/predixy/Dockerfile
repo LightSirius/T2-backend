@@ -20,4 +20,5 @@ RUN cd /tmp &&\
 ADD conf /etc/predixy/conf
 
 #CMD ["/usr/local/bin/predixy", "/etc/predixy/conf/predixy.conf"]
-CMD ["sh", "/etc/predixy/conf/cluster-setup.sh"]
+#CMD ["sh", "/etc/predixy/conf/cluster-setup.sh"]
+ENTRYPOINT ["sh", "/etc/predixy/conf/cluster-setup.sh"]
