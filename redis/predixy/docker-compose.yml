@@ -1,8 +1,0 @@
-version: '3.4'
-services:
-  predixy:
-    image: haandol/predixy:latest
-    volumes:
-      - ./conf:/etc/predixy/conf
-    ports:
-      - 7617:7617
