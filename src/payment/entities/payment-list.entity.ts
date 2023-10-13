@@ -21,7 +21,7 @@ export class PaymentList {
   payment_idx: number;
 
   @Column()
-  payment_uid: string;
+  payment_uuid: string;
 
   @Column()
   user_uuid: string;
