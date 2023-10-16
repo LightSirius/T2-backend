@@ -5,6 +5,10 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ShowModule } from './show/show.module';
+import { TicketModule } from './ticket/ticket.module';
+import { RedisModule } from './redis/redis.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -12,6 +16,10 @@ import { AuthModule } from './auth/auth.module';
     DatabaseModule,
     UserModule,
     AuthModule,
+    ShowModule,
+    TicketModule,
+    RedisModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -10,11 +10,12 @@ services:
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8
     ports:
       - "5432:5432"
+    command: postgres -c 'max_connections=3000'
 
-  app:
+  app-pm2:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile-pm2
     environment:
       - DB_HOST=db
       - DB_PORT=5432
@@ -30,6 +31,4 @@ services:
       - -c
       - |
         /usr/src/app/wait-for-it.sh db:5432 -t 10
-        npm run start:dev
-    volumes:
-      - ./src:/usr/src/app/src
+        pm2-runtime start ./dist/main.js -i max

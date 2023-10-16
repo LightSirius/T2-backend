@@ -13,6 +13,7 @@ lerna-debug.log*
 
 # Env
 .env
+.env.prod
 
 # OS
 .DS_Store
@@ -36,3 +37,7 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+
+# Load Test Log
+/test/load-test/log

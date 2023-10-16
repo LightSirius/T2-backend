@@ -7,7 +7,6 @@ import { User } from './entities/user.entity';
 import { UserAuth } from './entities/user-auth.entity';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { encodePassword } from '../utils/bcrypt';
-import { CreateUserAuthDto } from './dto/create-user-auth.dto';
 
 @Injectable()
 export class UserService {
