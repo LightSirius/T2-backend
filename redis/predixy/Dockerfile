@@ -17,7 +17,7 @@ RUN cd /tmp &&\
     cp redis-stable/src/redis-cli /usr/local/bin &&\
     rm -rf /tmp/redis-stable
 
-ADD conf /etc/predixy/conf
+#ADD conf /etc/predixy/conf
 
 #CMD ["/usr/local/bin/predixy", "/etc/predixy/conf/predixy.conf"]
 #CMD ["sh", "/etc/predixy/conf/cluster-setup.sh"]
