@@ -5,5 +5,5 @@ export class PaymentInherit {
   payment_uuid: string;
 
   @Column()
-  payment_idx: number;
+  payment_id: number;
 }
