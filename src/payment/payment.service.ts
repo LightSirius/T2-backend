@@ -48,4 +48,8 @@ export class PaymentService {
       await queryRunner.release();
     }
   }
+
+  async getPaymentLists(user_uuid: string) {
+    return await this.paymentListRepository.findBy({ user_uuid });
+  }
 }

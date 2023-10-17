@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
@@ -46,5 +48,10 @@ export class PaymentController {
         throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
       }
     }
+  }
+
+  @Get('user/:id')
+  async getPaymentLists(@Param('id') id: string) {
+    return this.paymentService.getPaymentLists(id);
   }
 }
