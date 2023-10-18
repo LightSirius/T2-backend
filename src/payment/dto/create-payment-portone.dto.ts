@@ -3,6 +3,9 @@ import { IsNumber, IsString } from 'class-validator';
 import { CreatePaymentDto } from './create-payment.dto';
 
 export class CreatePaymentPortoneDto extends PartialType(CreatePaymentDto) {
+  @ApiProperty({ description: 'imp_uid' })
+  @IsString()
+  imp_uid: string;
   @ApiProperty({ description: 'user_uuid' })
   @IsString()
   user_uuid: string;
