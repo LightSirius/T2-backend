@@ -24,7 +24,7 @@ export class PaymentService {
       switch (body.payment_type) {
         case PaymentType.portone: {
           const paymentPortone = new PaymentPortone({
-            payment_id: body.payment_id,
+            ...body,
           });
           await this.paymentPortoneRepository.save(paymentPortone);
 
@@ -32,6 +32,7 @@ export class PaymentService {
             payment_uuid: paymentPortone.payment_uuid,
             ...body,
           });
+          console.log(paymentList);
           await this.paymentListRepository.save(paymentList);
 
           return paymentList.payment_uuid;
