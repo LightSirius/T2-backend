@@ -53,8 +53,18 @@ export class TicketController {
     return this.ticketService.redis_test_set(req.key, req.val);
   }
 
-  @Post('/rset')
+  @Post('/reserve_seat')
   reserve_seat(@Body() ticketReserveDto: TicketReserveDto) {
     return this.ticketService.reserve_seat(ticketReserveDto);
+  }
+
+  @Post('/fix_seat')
+  fix_seat(@Body() ticketReserveDto: TicketReserveDto) {
+    return this.ticketService.fix_seat(ticketReserveDto);
+  }
+
+  @Post('/unset_seat')
+  unset_seat(@Body() ticketReserveDto: TicketReserveDto) {
+    return this.ticketService.unset_seat(ticketReserveDto);
   }
 }
