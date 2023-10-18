@@ -72,6 +72,17 @@ export class TicketService {
     }
   }
 
+  async fix_seat(ticketReserveDto: TicketReserveDto) {
+    const show_reserve_key_payload = `show_reserve:${ticketReserveDto.show_id}-${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`;
+    if (
+      await this.redis.set(show_reserve_key_payload, ticketReserveDto.user_uuid)
+    ) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
   redis_test_get(key: string) {
     return this.redis.get(key);
   }
