@@ -40,30 +40,36 @@ export class TicketService {
 
   async reserve_seat(ticketReserveDto: TicketReserveDto) {
     const ticket_reserve_key_payload = `ticket_reserve:${ticketReserveDto.user_uuid}`;
-    const ticket_reserve_key = await this.redis.get(ticket_reserve_key_payload);
-    if (ticket_reserve_key) {
-      return 0;
-    }
-
     const show_reserve_key_payload = `show_reserve:${ticketReserveDto.show_id}-${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`;
-    const show_reserve_key = await this.redis.get(show_reserve_key_payload);
-    if (show_reserve_key) {
-      return 0;
+
+    if (
+      await this.redis.set(
+        show_reserve_key_payload,
+        ticketReserveDto.user_uuid,
+        {
+          EX: 180,
+          NX: true,
+        },
+      )
+    ) {
+      if (
+        await this.redis.set(
+          ticket_reserve_key_payload,
+          `show-${ticketReserveDto.show_id}-${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`,
+          {
+            EX: 180,
+            NX: true,
+          },
+        )
+      ) {
+        console.log('a');
+        return await this.redis.get(ticket_reserve_key_payload);
+      } else {
+        return 2;
+      }
+    } else {
+      return 1;
     }
-
-    await this.redis.pSetEx(
-      show_reserve_key_payload,
-      10000,
-      ticketReserveDto.user_uuid,
-    );
-
-    await this.redis.pSetEx(
-      ticket_reserve_key_payload,
-      10000,
-      `show-${ticketReserveDto.show_id}-${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`,
-    );
-
-    return await this.redis.get(ticket_reserve_key_payload);
   }
 
   redis_test_get(key: string) {
