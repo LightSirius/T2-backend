@@ -11,6 +11,7 @@ import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { TicketReserveDto } from './dto/ticket-reserve.dto';
 
 @ApiTags('Ticket API')
 @Controller('ticket')
@@ -50,5 +51,10 @@ export class TicketController {
   @Post('/tset')
   t_set(@Body() req: { key: string; val: string }) {
     return this.ticketService.redis_test_set(req.key, req.val);
+  }
+
+  @Post('/rset')
+  reserve_seat(@Body() ticketReserveDto: TicketReserveDto) {
+    return this.ticketService.reserve_seat(ticketReserveDto);
   }
 }
