@@ -83,6 +83,15 @@ export class TicketService {
     }
   }
 
+  async unset_seat(ticketReserveDto: TicketReserveDto) {
+    const show_reserve_key_payload = `show_reserve:${ticketReserveDto.show_id}-${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`;
+    if (await this.redis.del(show_reserve_key_payload)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
   redis_test_get(key: string) {
     return this.redis.get(key);
   }
