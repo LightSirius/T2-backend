@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RedisClientType } from 'redis';
 import { TicketReserveDto } from './dto/ticket-reserve.dto';
 import { UnsetReserveDto } from './dto/unset-reserve.dto';
+import { TicketReserveListDto } from './dto/ticket-reserve-list.dto';
 
 @Injectable()
 export class TicketService {
@@ -114,11 +115,6 @@ export class TicketService {
   }
 
   async get_test() {
-    // const A = [];
-    // for await (const key of this.redis.scanIterator()) {
-    //   A.push(await this.redis.get(key));
-    // }
-    // return A;
     const A = [];
     for await (const key of this.redis.scanIterator({
       MATCH: 'show_reserve:1-*',
@@ -127,7 +123,6 @@ export class TicketService {
       A.push(key);
     }
     return A;
-    // return await this.redis.scanIterator({ MATCH: 'show_reserve:*' });
   }
 
   // # Strings to Hash
@@ -156,6 +151,7 @@ export class TicketService {
           reserve_seat_val_payload,
           Date.now() + 180000,
         );
+        console.log(reserve_seat_val_payload);
         return reserve_seat_val_payload;
       } else {
         return 1;
@@ -165,9 +161,34 @@ export class TicketService {
     }
   }
 
-  async get_test_hash() {
-    const hKeys = await this.redis.hGetAll('show_reserve:1');
-    // console.log(hKeys);
-    return hKeys;
+  async reserve_seat_list_hash(ticketReserveListDto: TicketReserveListDto) {
+    return await this.redis.hGetAll(
+      `show_reserve:${ticketReserveListDto.show_id}`,
+    );
+  }
+
+  async fix_reserve_hash(ticketReserveDto: TicketReserveDto) {
+    const show_reserve_key_payload = `show_reserve:${ticketReserveDto.show_id}`;
+    const reserve_seat_val_payload = `${ticketReserveDto.ticket_area}-${ticketReserveDto.ticket_seat}`;
+    if (
+      await this.redis.hSet(
+        show_reserve_key_payload,
+        reserve_seat_val_payload,
+        9000000000000,
+      )
+    ) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  async unset_reserve_hash(unsetReserveDto: UnsetReserveDto) {
+    const ticket_reserve_key_payload = `ticket_reserve:${unsetReserveDto.user_uuid}`;
+    if (await this.redis.del(ticket_reserve_key_payload)) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }
