@@ -41,4 +41,14 @@ export class BoardController {
   remove(@Param('id') id: string) {
     return this.boardService.remove(+id);
   }
+
+  @Get('list/:type/:page')
+  board_list(@Param('type') type: number, @Param('page') page: number) {
+    return this.boardService.board_list(+type, +page);
+  }
+
+  @Get('detail/:board_id')
+  board_detail(@Param('board_id') board_id: number) {
+    return this.boardService.board_detail(board_id);
+  }
 }
