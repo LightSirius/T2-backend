@@ -61,7 +61,13 @@ export class BoardService {
       .getRawMany();
   }
 
-  async board_detail(board_id: number) {
+  async board_detail(board_id: number): Promise<BoardDetailDto> {
+    if (await this.redis.hExists('board_detail_list', board_id.toString())) {
+      return JSON.parse(
+        await this.redis.hGet('board_detail_list', board_id.toString()),
+      );
+    }
+
     const data: BoardDetailDto = await this.boardRepository
       .createQueryBuilder('board')
       .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
@@ -74,7 +80,26 @@ export class BoardService {
       ])
       .where('board.board_id = :board_id', { board_id: board_id })
       .getRawOne();
-    console.log(data);
+
+    if (!data) {
+      return null;
+    }
+
+    this.redis.hSet(
+      'board_detail_list',
+      board_id.toString(),
+      JSON.stringify(data),
+    );
+
     return data;
+  }
+
+  async board_insert(createBoardDto: CreateBoardDto) {
+    this.create(createBoardDto);
+  }
+
+  async board_update(id: number, updateBoardDto: UpdateBoardDto) {
+    await this.update(id, updateBoardDto);
+    this.redis.hDel('board_detail_list', id.toString());
   }
 }
