@@ -41,4 +41,27 @@ export class BoardController {
   remove(@Param('id') id: string) {
     return this.boardService.remove(+id);
   }
+
+  @Get('list/:type/:page')
+  board_list(@Param('type') type: number, @Param('page') page: number) {
+    return this.boardService.board_list(+type, +page);
+  }
+
+  @Get('detail/:board_id')
+  board_detail(@Param('board_id') board_id: number) {
+    return this.boardService.board_detail(board_id);
+  }
+
+  @Post('insert')
+  board_insert(@Body() createBoardDto: CreateBoardDto) {
+    this.boardService.board_insert(createBoardDto);
+  }
+
+  @Post('update/:id')
+  board_update(
+    @Param('id') id: string,
+    @Body() updateBoardDto: UpdateBoardDto,
+  ) {
+    return this.boardService.board_update(+id, updateBoardDto);
+  }
 }

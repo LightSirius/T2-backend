@@ -21,7 +21,7 @@ export class Board {
   @PrimaryGeneratedColumn()
   board_id: number;
 
-  @Column()
+  @Column({ type: 'uuid' })
   user_uuid: string;
 
   @Column({ type: 'enum', enum: BoardType, default: BoardType.free })
