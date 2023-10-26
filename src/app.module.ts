@@ -9,6 +9,7 @@ import { ShowModule } from './show/show.module';
 import { TicketModule } from './ticket/ticket.module';
 import { RedisModule } from './redis/redis.module';
 import { PaymentModule } from './payment/payment.module';
+import { BoardModule } from './board/board.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PaymentModule } from './payment/payment.module';
     TicketModule,
     RedisModule,
     PaymentModule,
+    BoardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

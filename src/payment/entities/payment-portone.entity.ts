@@ -1,4 +1,4 @@
-import { Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { PaymentInherit } from './payment-inherit.entity';
 
 @Entity()
@@ -7,4 +7,7 @@ export class PaymentPortone extends PaymentInherit {
     super();
     Object.assign(this, paymentPortone);
   }
+
+  @Column()
+  imp_uid: string;
 }
