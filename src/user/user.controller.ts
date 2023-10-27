@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
+import { UserRegistrationDto } from './dto/user-registration.dto';
 
 @ApiTags('User API')
 @Controller('user')
@@ -45,5 +46,17 @@ export class UserController {
   @Delete(':user_uuid')
   async remove(@Param('user_uuid') user_uuid: string): Promise<DeleteResult> {
     return this.userService.remove(user_uuid);
+  }
+
+  @Post('validate/id')
+  async user_validate_id_duplicate(
+    @Body('auth_id') auth_id: string,
+  ): Promise<boolean> {
+    return await this.userService.user_validate_id_duplicate(auth_id);
+  }
+
+  @Post('registration')
+  async user_registration(@Body() userRegistrationDto: UserRegistrationDto) {
+    return this.userService.user_registration(userRegistrationDto);
   }
 }
