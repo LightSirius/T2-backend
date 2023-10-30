@@ -6,14 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { UserRegistrationDto } from './dto/user-registration.dto';
+import { UserModifyPasswordDto } from './dto/user-modify-password.dto';
+import { UserModifyInfoDto } from './dto/user-modify-info.dto';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 
 @ApiTags('User API')
 @Controller('user')
@@ -58,5 +63,23 @@ export class UserController {
   @Post('registration')
   async user_registration(@Body() userRegistrationDto: UserRegistrationDto) {
     return this.userService.user_registration(userRegistrationDto);
+  }
+
+  @Post('modify/info')
+  async user_modify_info(@Body() userModifyInfoDto: UserModifyInfoDto) {
+    return this.userService.user_modify_info(userModifyInfoDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('modify/password')
+  async user_modify_password(
+    @Body() userModifyPasswordDto: UserModifyPasswordDto,
+    @Request() guard,
+  ) {
+    return await this.userService.user_modify_password(
+      userModifyPasswordDto,
+      guard.user,
+    );
   }
 }
