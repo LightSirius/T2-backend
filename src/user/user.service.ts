@@ -8,6 +8,8 @@ import { UserAuth } from './entities/user-auth.entity';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { encodePassword } from '../utils/bcrypt';
 import { UserRegistrationDto } from './dto/user-registration.dto';
+import { UserModifyPasswordDto } from './dto/user-modify-password.dto';
+import { UserModifyInfoDto } from './dto/user-modify-info.dto';
 
 @Injectable()
 export class UserService {
@@ -41,7 +43,9 @@ export class UserService {
         userAuth,
       });
       if (await this.user_validate_id_duplicate(user.userAuth.auth_id)) {
-        return await this.entityManager.save(user);
+        if (await this.entityManager.save(user)) {
+          return user.user_uuid;
+        }
       } else {
         return 0;
       }
@@ -116,5 +120,22 @@ export class UserService {
       },
       ...userRegistrationDto,
     });
+  }
+
+  async user_modify_info(userModifyInfoDto: UserModifyInfoDto) {
+    return userModifyInfoDto;
+  }
+
+  async user_modify_password(
+    userModifyPasswordDto: UserModifyPasswordDto,
+    guard: { uuid: string },
+  ) {
+    const user = await this.findOneWithAuth(guard.uuid);
+
+    user.userAuth.auth_password = await encodePassword(
+      userModifyPasswordDto.auth_password,
+    );
+
+    return await this.entityManager.save(user);
   }
 }
