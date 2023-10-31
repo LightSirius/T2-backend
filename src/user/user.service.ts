@@ -122,8 +122,19 @@ export class UserService {
     });
   }
 
-  async user_modify_info(userModifyInfoDto: UserModifyInfoDto) {
-    return userModifyInfoDto;
+  async user_modify_info(
+    userModifyInfoDto: UserModifyInfoDto,
+    guard: { uuid: string },
+  ) {
+    const user = await this.userRepository.findOneBy({ user_uuid: guard.uuid });
+    user.user_email = userModifyInfoDto.user_email
+      ? userModifyInfoDto.user_email
+      : user.user_email;
+    user.user_born = userModifyInfoDto.user_born
+      ? userModifyInfoDto.user_born
+      : user.user_born;
+
+    return await this.entityManager.save(user);
   }
 
   async user_modify_password(

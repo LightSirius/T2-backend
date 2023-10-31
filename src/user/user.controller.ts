@@ -65,9 +65,14 @@ export class UserController {
     return this.userService.user_registration(userRegistrationDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('modify/info')
-  async user_modify_info(@Body() userModifyInfoDto: UserModifyInfoDto) {
-    return this.userService.user_modify_info(userModifyInfoDto);
+  async user_modify_info(
+    @Body() userModifyInfoDto: UserModifyInfoDto,
+    @Request() guard,
+  ) {
+    return this.userService.user_modify_info(userModifyInfoDto, guard.user);
   }
 
   @ApiBearerAuth()
