@@ -63,11 +63,14 @@ export class BoardController {
     return await this.boardService.board_insert(boardInsertDto, guard.user);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('update/:id')
-  board_update(
+  board_modify(
     @Param('id') id: string,
     @Body() updateBoardDto: UpdateBoardDto,
+    @Request() guard,
   ) {
-    return this.boardService.board_update(+id, updateBoardDto);
+    return this.boardService.board_modify(+id, updateBoardDto, guard.user);
   }
 }

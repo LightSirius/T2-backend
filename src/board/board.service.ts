@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { EntityManager, Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { User } from '../user/entities/user.entity';
 import { BoardListDto } from './dto/board-list.dto';
 import { BoardDetailDto } from './dto/board-detail.dto';
 import { BoardInsertDto } from './dto/board-insert.dto';
+import { BoardModifyDto } from './dto/board-modify.dto';
 
 @Injectable()
 export class BoardService {
@@ -112,8 +113,17 @@ export class BoardService {
     return board.board_id;
   }
 
-  async board_update(id: number, updateBoardDto: UpdateBoardDto) {
-    await this.update(id, updateBoardDto);
-    await this.redis.hDel('board_detail_list', id.toString());
+  async board_modify(
+    id: number,
+    boardModifyDto: BoardModifyDto,
+    guard: { uuid: string },
+  ) {
+    const board = await this.findOne(id);
+    if (board.user_uuid == guard.uuid) {
+      await this.update(id, boardModifyDto);
+      await this.redis.hDel('board_detail_list', id.toString());
+    } else {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
   }
 }
