@@ -113,6 +113,8 @@ export class BoardService {
     return board.board_id;
   }
 
+  // TODO:: 본인의 게시물인지 확인하는 함수 추가할 필요가 있음. board_check_owner()
+  //  프론트에서 수정하기 페이지 넘어가기 전에 해당 API 호출해서 본인 게시물이 맞는지 체크할 수 있게.
   async board_modify(
     id: number,
     boardModifyDto: BoardModifyDto,
