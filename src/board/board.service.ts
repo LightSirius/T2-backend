@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { EntityManager, Repository } from 'typeorm';
@@ -8,6 +8,8 @@ import { RedisClientType } from 'redis';
 import { User } from '../user/entities/user.entity';
 import { BoardListDto } from './dto/board-list.dto';
 import { BoardDetailDto } from './dto/board-detail.dto';
+import { BoardInsertDto } from './dto/board-insert.dto';
+import { BoardModifyDto } from './dto/board-modify.dto';
 
 @Injectable()
 export class BoardService {
@@ -40,25 +42,34 @@ export class BoardService {
     return `This action removes a #${id} board`;
   }
 
-  async board_list(type: number, page: number): Promise<BoardListDto[]> {
+  async board_list(type: number, page: number): Promise<BoardListDto> {
     const sql_limit = 20;
     const sql_page = page - 1 > 0 ? page - 1 : 0;
     const sql_offset = sql_page * sql_limit;
 
-    return await this.boardRepository
-      .createQueryBuilder('board')
-      .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
-      .select([
-        'board.board_id AS board_id',
-        'board.board_title AS board_title',
-        // 'board.board_contents AS board_contents',
-        'user.user_name AS user_name',
-      ])
-      .where('board.board_type = :type', { type: type })
-      .orderBy('board.board_id', 'DESC')
-      .limit(20)
-      .offset(sql_offset)
-      .getRawMany();
+    return {
+      total_page: Math.ceil(
+        (await this.boardRepository.count({
+          where: {
+            board_type: type,
+          },
+        })) / sql_limit,
+      ),
+      board_list: await this.boardRepository
+        .createQueryBuilder('board')
+        .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
+        .select([
+          'board.board_id AS board_id',
+          'board.board_title AS board_title',
+          // 'board.board_contents AS board_contents',
+          'user.user_name AS user_name',
+        ])
+        .where('board.board_type = :type', { type: type })
+        .orderBy('board.board_id', 'DESC')
+        .limit(20)
+        .offset(sql_offset)
+        .getRawMany(),
+    };
   }
 
   async board_detail(board_id: number): Promise<BoardDetailDto> {
@@ -94,12 +105,27 @@ export class BoardService {
     return data;
   }
 
-  async board_insert(createBoardDto: CreateBoardDto) {
-    this.create(createBoardDto);
+  async board_insert(boardInsertDto: BoardInsertDto, guard: { uuid: string }) {
+    const board = await this.create({
+      user_uuid: guard.uuid,
+      ...boardInsertDto,
+    });
+    return board.board_id;
   }
 
-  async board_update(id: number, updateBoardDto: UpdateBoardDto) {
-    await this.update(id, updateBoardDto);
-    this.redis.hDel('board_detail_list', id.toString());
+  // TODO:: 본인의 게시물인지 확인하는 함수 추가할 필요가 있음. board_check_owner()
+  //  프론트에서 수정하기 페이지 넘어가기 전에 해당 API 호출해서 본인 게시물이 맞는지 체크할 수 있게.
+  async board_modify(
+    id: number,
+    boardModifyDto: BoardModifyDto,
+    guard: { uuid: string },
+  ) {
+    const board = await this.findOne(id);
+    if (board.user_uuid == guard.uuid) {
+      await this.update(id, boardModifyDto);
+      await this.redis.hDel('board_detail_list', id.toString());
+    } else {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
   }
 }
