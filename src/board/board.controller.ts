@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { BoardInsertDto } from './dto/board-insert.dto';
 
 @ApiTags('Board API')
 @Controller('board')
@@ -52,9 +56,11 @@ export class BoardController {
     return this.boardService.board_detail(board_id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('insert')
-  async board_insert(@Body() createBoardDto: CreateBoardDto) {
-    return await this.boardService.board_insert(createBoardDto);
+  async board_insert(@Body() boardInsertDto: BoardInsertDto, @Request() guard) {
+    return await this.boardService.board_insert(boardInsertDto, guard.user);
   }
 
   @Post('update/:id')

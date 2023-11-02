@@ -8,6 +8,7 @@ import { RedisClientType } from 'redis';
 import { User } from '../user/entities/user.entity';
 import { BoardListDto } from './dto/board-list.dto';
 import { BoardDetailDto } from './dto/board-detail.dto';
+import { BoardInsertDto } from './dto/board-insert.dto';
 
 @Injectable()
 export class BoardService {
@@ -103,8 +104,11 @@ export class BoardService {
     return data;
   }
 
-  async board_insert(createBoardDto: CreateBoardDto) {
-    const board = await this.create(createBoardDto);
+  async board_insert(boardInsertDto: BoardInsertDto, guard: { uuid: string }) {
+    const board = await this.create({
+      user_uuid: guard.uuid,
+      ...boardInsertDto,
+    });
     return board.board_id;
   }
 
