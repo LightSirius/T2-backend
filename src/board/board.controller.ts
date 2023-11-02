@@ -53,8 +53,8 @@ export class BoardController {
   }
 
   @Post('insert')
-  board_insert(@Body() createBoardDto: CreateBoardDto) {
-    this.boardService.board_insert(createBoardDto);
+  async board_insert(@Body() createBoardDto: CreateBoardDto) {
+    return await this.boardService.board_insert(createBoardDto);
   }
 
   @Post('update/:id')
