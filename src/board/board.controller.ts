@@ -65,12 +65,19 @@ export class BoardController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('update/:id')
+  @Post('modify/:id')
   board_modify(
     @Param('id') id: string,
     @Body() updateBoardDto: UpdateBoardDto,
     @Request() guard,
   ) {
     return this.boardService.board_modify(+id, updateBoardDto, guard.user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('check-owner/:id')
+  board_check_owner(@Param('id') id: string, @Request() guard) {
+    return this.boardService.board_check_owner(+id, guard.user);
   }
 }
