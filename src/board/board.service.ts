@@ -10,6 +10,7 @@ import { BoardListDto } from './dto/board-list.dto';
 import { BoardDetailDto } from './dto/board-detail.dto';
 import { BoardInsertDto } from './dto/board-insert.dto';
 import { BoardModifyDto } from './dto/board-modify.dto';
+import { isEmpty } from '../utils/utill';
 
 @Injectable()
 export class BoardService {
@@ -73,36 +74,60 @@ export class BoardService {
   }
 
   async board_detail(board_id: number): Promise<BoardDetailDto> {
+    let board_detail_data = new BoardDetailDto();
+
     if (await this.redis.hExists('board_detail_list', board_id.toString())) {
-      return JSON.parse(
-        await this.redis.hGet('board_detail_list', board_id.toString()),
-      );
+      board_detail_data = {
+        ...JSON.parse(
+          await this.redis.hGet('board_detail_list', board_id.toString()),
+        ),
+      };
+    } else {
+      board_detail_data = {
+        ...(await this.boardRepository
+          .createQueryBuilder('board')
+          .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
+          .select([
+            'board.board_id AS board_id',
+            'board.board_type AS board_type',
+            'board.board_title AS board_title',
+            'board.board_contents AS board_contents',
+            'user.user_name AS user_name',
+            'board.update_date AS update_date',
+          ])
+          .where('board.board_id = :board_id', { board_id: board_id })
+          .getRawOne()),
+      };
     }
 
-    const data: BoardDetailDto = await this.boardRepository
-      .createQueryBuilder('board')
-      .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
-      .select([
-        'board.board_id AS board_id',
-        'board.board_title AS board_title',
-        'board.board_contents AS board_contents',
-        'user.user_name AS user_name',
-        'board.update_date AS update_date',
-      ])
-      .where('board.board_id = :board_id', { board_id: board_id })
-      .getRawOne();
+    console.log(board_detail_data);
 
-    if (!data) {
+    if (isEmpty(board_detail_data)) {
       return null;
     }
 
-    this.redis.hSet(
+    await this.redis.hSet(
       'board_detail_list',
       board_id.toString(),
-      JSON.stringify(data),
+      JSON.stringify(board_detail_data),
     );
 
-    return data;
+    board_detail_data.near_board_list = {
+      ...(await this.entityManager.query(
+        'select board_id, board_type, board_title, create_date ' +
+          'from (select board_id, board_type, board_title, create_date ' +
+          'from board where board_id < $1 and board_type = $2 order by board_id DESC limit 1) as before_detail ' +
+          'union all ' +
+          'select board_id, board_type, board_title, create_date ' +
+          'from (select board_id, board_type, board_title, create_date ' +
+          'from board where board_id > $1 and board_type = $2 order by board_id limit 1) as after_detail',
+        [board_id, board_detail_data.board_type],
+      )),
+    };
+
+    console.log(board_detail_data);
+
+    return board_detail_data;
   }
 
   async board_insert(boardInsertDto: BoardInsertDto, guard: { uuid: string }) {
