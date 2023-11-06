@@ -92,6 +92,7 @@ export class BoardService {
             'board.board_type AS board_type',
             'board.board_title AS board_title',
             'board.board_contents AS board_contents',
+            'board.user_uuid AS user_uuid',
             'user.user_name AS user_name',
             'board.update_date AS update_date',
           ])
@@ -99,8 +100,6 @@ export class BoardService {
           .getRawOne()),
       };
     }
-
-    console.log(board_detail_data);
 
     if (isEmpty(board_detail_data)) {
       return null;
@@ -125,8 +124,6 @@ export class BoardService {
       )),
     };
 
-    console.log(board_detail_data);
-
     return board_detail_data;
   }
 
@@ -138,19 +135,32 @@ export class BoardService {
     return board.board_id;
   }
 
-  // TODO:: 본인의 게시물인지 확인하는 함수 추가할 필요가 있음. board_check_owner()
-  //  프론트에서 수정하기 페이지 넘어가기 전에 해당 API 호출해서 본인 게시물이 맞는지 체크할 수 있게.
   async board_modify(
     id: number,
     boardModifyDto: BoardModifyDto,
     guard: { uuid: string },
   ) {
-    const board = await this.findOne(id);
-    if (board.user_uuid == guard.uuid) {
-      await this.update(id, boardModifyDto);
-      await this.redis.hDel('board_detail_list', id.toString());
-    } else {
+    const board = await this.board_check_owner(id, guard);
+
+    if (!board) {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.update(id, boardModifyDto);
+    await this.redis.hDel('board_detail_list', id.toString());
+
+    return board.board_id;
+  }
+
+  async board_check_owner(
+    board_id: number,
+    guard: { uuid: string },
+  ): Promise<Board> {
+    const board = await this.findOne(board_id);
+    if (board.user_uuid == guard.uuid) {
+      return board;
+    } else {
+      return null;
     }
   }
 }
