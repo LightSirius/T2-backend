@@ -8,7 +8,7 @@ import {
 
 @Entity()
 export class Comment {
-  constructor(comment: Comment) {
+  constructor(comment: Partial<Comment>) {
     Object.assign(this, comment);
   }
 
