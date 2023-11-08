@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { CommentInsertDto } from './dto/comment-insert.dto';
 
 @ApiTags('Comment API')
 @Controller('comment')
@@ -42,11 +46,29 @@ export class CommentController {
     return this.commentService.remove(+id);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('insert')
+  async comment_insert(
+    @Body() commentInsertDto: CommentInsertDto,
+    @Request() guard,
+  ) {
+    return await this.commentService.comment_insert(
+      commentInsertDto,
+      guard.user,
+    );
+  }
+
   @Get('list/:board_id/:page')
   comment_list(
     @Param('board_id') board_id: number,
     @Param('page') page: number,
   ) {
     return this.commentService.comment_list(+board_id, +page);
+  }
+
+  @Get('count/:board_id')
+  comment_list_count(@Param('board_id') board_id: number) {
+    return this.commentService.comment_list_count(board_id);
   }
 }
