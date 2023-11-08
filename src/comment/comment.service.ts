@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
+import { CommentInsertDto } from './dto/comment-insert.dto';
 
 @Injectable()
 export class CommentService {
@@ -37,6 +38,21 @@ export class CommentService {
 
   remove(id: number) {
     return `This action removes a #${id} comment`;
+  }
+
+  async comment_insert(
+    commentInsertDto: CommentInsertDto,
+    guard: { uuid: string },
+  ) {
+    const comment = await this.create({
+      user_uuid: guard.uuid,
+      ...commentInsertDto,
+    });
+    comment.comment_sort_idx =
+      comment.comment_reply_id == 0
+        ? comment.comment_id
+        : comment.comment_reply_id;
+    return await this.entityManager.save(comment);
   }
 
   async comment_list(board_id: number, page: number) {
