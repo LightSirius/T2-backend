@@ -15,6 +15,12 @@ export class Comment {
   @PrimaryGeneratedColumn()
   comment_id: number;
 
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  comment_sort_idx: number;
+
   @Column()
   board_id: number;
 
