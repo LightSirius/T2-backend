@@ -88,5 +88,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "eslintIgnore": ["/test/load-test"]
 }

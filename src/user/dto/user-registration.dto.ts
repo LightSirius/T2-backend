@@ -1,4 +1,3 @@
-import { CreateUserAuthDto } from './create-user-auth.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserGender } from '../entities/user.entity';
 import { IsDate, IsEmail, IsEnum, IsString, Matches } from 'class-validator';
