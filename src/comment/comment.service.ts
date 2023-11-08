@@ -85,4 +85,10 @@ export class CommentService {
         .getRawMany(),
     };
   }
+
+  async comment_list_count(board_id: number) {
+    return await this.commentRepository.count({
+      where: { board_id: board_id },
+    });
+  }
 }
