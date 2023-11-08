@@ -75,10 +75,11 @@ export class CommentService {
           'comment.comment_id AS comment_id',
           'comment.comment_reply_id AS comment_reply_id',
           'comment.comment_contents AS comment_contents',
+          'comment.create_date AS create_date',
           'user.user_name AS user_name',
         ])
         .where('comment.board_id = :board_id', { board_id: board_id })
-        .orderBy('comment.comment_sort_idx')
+        .orderBy('comment.comment_sort_idx, comment.comment_id')
         .limit(sql_limit)
         .offset(sql_offset)
         .getRawMany(),
