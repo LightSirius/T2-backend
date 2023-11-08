@@ -12,7 +12,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Board API')
+@ApiTags('Comment API')
 @Controller('comment')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -40,5 +40,13 @@ export class CommentController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.commentService.remove(+id);
+  }
+
+  @Get('list/:board_id/:page')
+  comment_list(
+    @Param('board_id') board_id: number,
+    @Param('page') page: number,
+  ) {
+    return this.commentService.comment_list(+board_id, +page);
   }
 }
