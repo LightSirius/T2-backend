@@ -11,6 +11,7 @@ import { BoardDetailDto } from './dto/board-detail.dto';
 import { BoardInsertDto } from './dto/board-insert.dto';
 import { BoardModifyDto } from './dto/board-modify.dto';
 import { isEmpty } from '../utils/utill';
+import { BoardSearchDto } from './dto/board-search.dto';
 
 @Injectable()
 export class BoardService {
@@ -162,5 +163,50 @@ export class BoardService {
     } else {
       return null;
     }
+  }
+
+  async board_search_list(
+    boardSearchDto: BoardSearchDto,
+  ): Promise<BoardListDto> {
+    const sql_limit = 20;
+    const sql_page = boardSearchDto.page - 1 > 0 ? boardSearchDto.page - 1 : 0;
+    const sql_offset = sql_page * sql_limit;
+
+    return {
+      total_page: Math.ceil(
+        (await this.boardRepository
+          .createQueryBuilder('board')
+          .select([
+            'board.board_id AS board_id',
+            'board.board_title AS board_title',
+          ])
+          .where('board.board_type = :type', {
+            type: boardSearchDto.board_type,
+          })
+          .andWhere('board.board_title like :search_string')
+          .orWhere('board.board_contents like :search_string')
+          .setParameter(
+            'search_string',
+            '%' + boardSearchDto.search_string + '%',
+          )
+          .getCount()) / sql_limit,
+      ),
+      board_list: await this.boardRepository
+        .createQueryBuilder('board')
+        .leftJoinAndSelect(User, 'user', 'board.user_uuid = user.user_uuid')
+        .select([
+          'board.board_id AS board_id',
+          'board.board_title AS board_title',
+          'user.user_name AS user_name',
+        ])
+        .where('board.board_type = :type', { type: boardSearchDto.board_type })
+        .andWhere('board.board_title like :search_string')
+        .orWhere('board.board_contents like :search_string')
+        .setParameter('search_string', '%' + boardSearchDto.search_string + '%')
+        .orderBy('board.board_id', 'DESC')
+        .limit(sql_limit)
+        .offset(sql_offset)
+        .getRawMany(),
+    };
   }
 }
