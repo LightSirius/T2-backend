@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { EntityManager, Repository } from 'typeorm';
@@ -171,8 +177,9 @@ export class BoardService {
     const sql_limit = 20;
     const sql_page = boardSearchDto.page - 1 > 0 ? boardSearchDto.page - 1 : 0;
     const sql_offset = sql_page * sql_limit;
+    const now = Date.now();
 
-    return {
+    const search_list = {
       total_page: Math.ceil(
         (await this.boardRepository
           .createQueryBuilder('board')
@@ -208,5 +215,9 @@ export class BoardService {
         .offset(sql_offset)
         .getRawMany(),
     };
+
+    Logger.log(`board_search_list latency ${Date.now() - now}ms`, `Board`);
+
+    return search_list;
   }
 }
