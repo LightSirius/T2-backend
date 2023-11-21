@@ -134,9 +134,13 @@ export class BoardService {
     return board_detail_data;
   }
 
-  async board_insert(boardInsertDto: BoardInsertDto, guard: { uuid: string }) {
+  async board_insert(
+    boardInsertDto: BoardInsertDto,
+    guard: { uuid: string; name: string },
+  ) {
     const board = await this.create({
       user_uuid: guard.uuid,
+      user_name: guard.name,
       ...boardInsertDto,
     });
     return board.board_id;
