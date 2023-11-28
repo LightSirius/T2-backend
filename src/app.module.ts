@@ -10,6 +10,7 @@ import { TicketModule } from './ticket/ticket.module';
 import { RedisModule } from './redis/redis.module';
 import { PaymentModule } from './payment/payment.module';
 import { BoardModule } from './board/board.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { BoardModule } from './board/board.module';
     RedisModule,
     PaymentModule,
     BoardModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

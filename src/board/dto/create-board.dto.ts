@@ -6,6 +6,9 @@ export class CreateBoardDto {
   @ApiProperty({ description: 'user_uuid' })
   @IsString()
   user_uuid: string;
+  @ApiProperty({ description: 'user_name' })
+  @IsString()
+  user_name: string;
   @ApiProperty({ description: 'board_type' })
   @IsEnum(BoardType)
   board_type: BoardType;

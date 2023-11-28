@@ -15,6 +15,7 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { BoardInsertDto } from './dto/board-insert.dto';
+import { BoardSearchDto } from './dto/board-search.dto';
 
 @ApiTags('Board API')
 @Controller('board')
@@ -65,12 +66,33 @@ export class BoardController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('update/:id')
+  @Post('modify/:board_id')
   board_modify(
-    @Param('id') id: string,
+    @Param('board_id') board_id: string,
     @Body() updateBoardDto: UpdateBoardDto,
     @Request() guard,
   ) {
-    return this.boardService.board_modify(+id, updateBoardDto, guard.user);
+    return this.boardService.board_modify(
+      +board_id,
+      updateBoardDto,
+      guard.user,
+    );
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('check-owner/:board_id')
+  board_check_owner(@Param('board_id') board_id: string, @Request() guard) {
+    return this.boardService.board_check_owner(+board_id, guard.user);
+  }
+
+  @Post('search')
+  board_search_list(@Body() boardSearchDto: BoardSearchDto) {
+    return this.boardService.board_search_list(boardSearchDto);
+  }
+
+  @Post('search_es')
+  board_search_list_es(@Body() boardSearchDto: BoardSearchDto) {
+    return this.boardService.board_search_list_es(boardSearchDto);
   }
 }
