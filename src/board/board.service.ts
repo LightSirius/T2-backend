@@ -18,6 +18,7 @@ import { BoardInsertDto } from './dto/board-insert.dto';
 import { BoardModifyDto } from './dto/board-modify.dto';
 import { isEmpty } from '../utils/utill';
 import { BoardSearchDto } from './dto/board-search.dto';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Injectable()
 export class BoardService {
@@ -27,6 +28,7 @@ export class BoardService {
     @InjectRepository(Board)
     private boardRepository: Repository<Board>,
     private readonly entityManager: EntityManager,
+    private readonly elasticsearchService: ElasticsearchService,
   ) {}
   create(createBoardDto: CreateBoardDto) {
     const board = new Board(createBoardDto);
@@ -223,5 +225,41 @@ export class BoardService {
     Logger.log(`board_search_list latency ${Date.now() - now}ms`, `Board`);
 
     return search_list;
+  }
+
+  async board_search_list_es(boardSearchDto: BoardSearchDto) {
+    const now = Date.now();
+    const board_data = await this.elasticsearchService.search({
+      index: 'board_community',
+      size: 20,
+      sort: [
+        {
+          board_id: {
+            order: 'desc',
+          },
+        },
+      ],
+      query: {
+        bool: {
+          must: {
+            match: {
+              board_title: '글',
+            },
+          },
+          filter: [
+            {
+              term: {
+                board_type: '1',
+              },
+            },
+          ],
+        },
+      },
+      search_after: ['173'],
+      track_total_hits: true,
+    });
+    Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
+
+    return board_data;
   }
 }
