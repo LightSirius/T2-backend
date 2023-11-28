@@ -21,12 +21,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "k6:grafana": "docker-compose -f docker-compose-granafa.yml up"
+    "k6:grafana": "docker-compose -f docker-compose-granafa.yml up",
+    "elastic:bulk": "node --max-old-space-size=16000 elk/tools/convert-es-bulk.ts"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.10.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.1",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/elasticsearch": "^10.0.1",
     "@nestjs/jwt": "^10.1.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.2",
@@ -36,6 +39,7 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "dotenv": "^16.3.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -43,7 +47,9 @@
     "pm2": "^5.3.0",
     "redis": "^4.6.10",
     "reflect-metadata": "^0.1.13",
+    "request": "^2.88.2",
     "rxjs": "^7.8.1",
+    "stream-json": "^1.8.0",
     "typeorm": "^0.3.17"
   },
   "devDependencies": {
@@ -89,5 +95,7 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "eslintIgnore": ["/test/load-test"]
+  "eslintIgnore": [
+    "/test/load-test"
+  ]
 }

@@ -24,6 +24,9 @@ export class Board {
   @Column({ type: 'uuid' })
   user_uuid: string;
 
+  @Column()
+  user_name: string;
+
   @Column({ type: 'enum', enum: BoardType, default: BoardType.free })
   board_type: BoardType;
 

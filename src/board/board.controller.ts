@@ -90,4 +90,9 @@ export class BoardController {
   board_search_list(@Body() boardSearchDto: BoardSearchDto) {
     return this.boardService.board_search_list(boardSearchDto);
   }
+
+  @Post('search_es')
+  board_search_list_es(@Body() boardSearchDto: BoardSearchDto) {
+    return this.boardService.board_search_list_es(boardSearchDto);
+  }
 }
