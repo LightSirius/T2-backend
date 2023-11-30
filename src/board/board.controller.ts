@@ -93,12 +93,12 @@ export class BoardController {
     return this.boardService.board_search_list(boardSearchDto);
   }
 
-  @Post('search_es_newest')
+  @Post('search-es-newest')
   board_search_list_es_newest(@Body() boardEsNewestDto: BoardEsNewestDto) {
     return this.boardService.board_search_list_es_newest(boardEsNewestDto);
   }
 
-  @Post('search_es_score')
+  @Post('search-es-score')
   board_search_list_es_score(@Body() boardEsScoreDto: BoardEsScoreDto) {
     return this.boardService.board_search_list_es_score(boardEsScoreDto);
   }
