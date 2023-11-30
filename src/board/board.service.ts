@@ -19,6 +19,12 @@ import { BoardModifyDto } from './dto/board-modify.dto';
 import { isEmpty } from '../utils/utill';
 import { BoardSearchDto } from './dto/board-search.dto';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import {
+  BoardEsNewestPayload,
+  BoardEsScorePayload,
+} from './payload/board-es.payload';
+import { BoardEsNewestDto } from './dto/board-es-newest.dto';
+import { BoardEsScoreDto } from './dto/board-es-score.dto';
 
 @Injectable()
 export class BoardService {
@@ -227,9 +233,10 @@ export class BoardService {
     return search_list;
   }
 
-  async board_search_list_es(boardSearchDto: BoardSearchDto) {
+  async board_search_list_es_newest(boardEsNewestDto: BoardEsNewestDto) {
     const now = Date.now();
-    const board_data = await this.elasticsearchService.search({
+
+    const search_sql: BoardEsNewestPayload = {
       index: 'board_community',
       size: 20,
       sort: [
@@ -243,22 +250,68 @@ export class BoardService {
         bool: {
           must: {
             match: {
-              board_title: '글',
+              board_title: boardEsNewestDto.search_string,
             },
           },
           filter: [
             {
               term: {
-                board_type: '1',
+                board_type: boardEsNewestDto.board_type,
               },
             },
           ],
         },
       },
-      search_after: ['173'],
       track_total_hits: true,
-    });
-    Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
+    };
+
+    if (boardEsNewestDto.search_after != 0) {
+      search_sql.search_after = [boardEsNewestDto.search_after];
+    }
+
+    const board_data = await this.elasticsearchService.search(search_sql);
+    Logger.log(
+      `board_search_list_es_newest latency ${Date.now() - now}ms`,
+      `Board`,
+    );
+
+    return board_data;
+  }
+
+  async board_search_list_es_score(boardEsScoreDto: BoardEsScoreDto) {
+    const now = Date.now();
+
+    const search_sql: BoardEsScorePayload = {
+      index: 'board_community',
+      size: 20,
+      query: {
+        bool: {
+          must: {
+            match: {
+              board_title: boardEsScoreDto.search_string,
+            },
+          },
+          filter: [
+            {
+              term: {
+                board_type: boardEsScoreDto.board_type,
+              },
+            },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
+
+    if (boardEsScoreDto.search_from != 0) {
+      search_sql.from = boardEsScoreDto.search_from;
+    }
+
+    const board_data = await this.elasticsearchService.search(search_sql);
+    Logger.log(
+      `board_search_list_es_score latency ${Date.now() - now}ms`,
+      `Board`,
+    );
 
     return board_data;
   }
