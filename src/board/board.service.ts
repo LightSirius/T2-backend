@@ -249,9 +249,7 @@ export class BoardService {
       query: {
         bool: {
           must: {
-            match: {
-              board_title: boardEsNewestDto.search_string,
-            },
+            match: {},
           },
           filter: [
             {
@@ -264,6 +262,29 @@ export class BoardService {
       },
       track_total_hits: true,
     };
+
+    switch (boardEsNewestDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must.match.board_title =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must.match.user_name =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      default: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsNewestDto.search_string;
+        break;
+      }
+    }
 
     if (boardEsNewestDto.search_after != 0) {
       search_sql.search_after = [boardEsNewestDto.search_after];
@@ -287,9 +308,7 @@ export class BoardService {
       query: {
         bool: {
           must: {
-            match: {
-              board_title: boardEsScoreDto.search_string,
-            },
+            match: {},
           },
           filter: [
             {
@@ -302,6 +321,29 @@ export class BoardService {
       },
       track_total_hits: true,
     };
+
+    switch (boardEsScoreDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must.match.board_title =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must.match.user_name =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      default: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsScoreDto.search_string;
+        break;
+      }
+    }
 
     if (boardEsScoreDto.search_from != 0) {
       search_sql.from = boardEsScoreDto.search_from;
