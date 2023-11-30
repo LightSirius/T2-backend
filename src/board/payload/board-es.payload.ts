@@ -12,7 +12,9 @@ export class BoardEsNewestPayload {
     bool: {
       must: {
         match: {
-          board_title: string;
+          board_title?: string;
+          board_contents?: string;
+          user_name?: string;
         };
       };
       filter: [
@@ -36,7 +38,9 @@ export class BoardEsScorePayload {
     bool: {
       must: {
         match: {
-          board_title: string;
+          board_title?: string;
+          board_contents?: string;
+          user_name?: string;
         };
       };
       filter: [
