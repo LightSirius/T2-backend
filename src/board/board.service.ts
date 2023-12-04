@@ -151,7 +151,21 @@ export class BoardService {
       user_name: guard.name,
       ...boardInsertDto,
     });
-    return board.board_id;
+    const es_result = await this.elasticsearchService.create({
+      index: 'board_community',
+      id: board.board_id.toString(),
+      document: {
+        board_id: board.board_id,
+        board_title: board.board_title,
+        board_contents: board.board_contents,
+        board_type: board.board_type,
+        user_name: board.user_name,
+      },
+    });
+    if (es_result) {
+      return board.board_id;
+    }
+    return 0;
   }
 
   async board_modify(
