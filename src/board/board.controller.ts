@@ -16,6 +16,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { BoardInsertDto } from './dto/board-insert.dto';
 import { BoardSearchDto } from './dto/board-search.dto';
+import { BoardEsNewestDto } from './dto/board-es-newest.dto';
+import { BoardEsScoreDto } from './dto/board-es-score.dto';
 
 @ApiTags('Board API')
 @Controller('board')
@@ -91,8 +93,13 @@ export class BoardController {
     return this.boardService.board_search_list(boardSearchDto);
   }
 
-  @Post('search_es')
-  board_search_list_es(@Body() boardSearchDto: BoardSearchDto) {
-    return this.boardService.board_search_list_es(boardSearchDto);
+  @Post('search-es-newest')
+  board_search_list_es_newest(@Body() boardEsNewestDto: BoardEsNewestDto) {
+    return this.boardService.board_search_list_es_newest(boardEsNewestDto);
+  }
+
+  @Post('search-es-score')
+  board_search_list_es_score(@Body() boardEsScoreDto: BoardEsScoreDto) {
+    return this.boardService.board_search_list_es_score(boardEsScoreDto);
   }
 }
