@@ -162,16 +162,20 @@ export class BoardService {
         user_name: board.user_name,
       },
     });
-    if (es_result) {
-      return board.board_id;
+    if (!es_result) {
+      throw new HttpException(
+        'Generation failed',
+        HttpStatus.FAILED_DEPENDENCY,
+      );
     }
-    return 0;
+
+    return board.board_id;
   }
 
   async board_modify(
     id: number,
     boardModifyDto: BoardModifyDto,
-    guard: { uuid: string },
+    guard: { uuid: string; name: string },
   ) {
     const board = await this.board_check_owner(id, guard);
 
@@ -181,6 +185,24 @@ export class BoardService {
 
     await this.update(id, boardModifyDto);
     await this.redis.hDel('board_detail_list', id.toString());
+
+    const es_result = await this.elasticsearchService.update({
+      index: 'board_community',
+      id: board.board_id.toString(),
+      doc: {
+        board_id: board.board_id,
+        board_title: board.board_title,
+        board_contents: board.board_contents,
+        board_type: board.board_type,
+        user_name: board.user_name,
+      },
+    });
+    if (!es_result) {
+      throw new HttpException(
+        'Generation failed',
+        HttpStatus.FAILED_DEPENDENCY,
+      );
+    }
 
     return board.board_id;
   }
