@@ -8,6 +8,7 @@ import { RedisClientType } from 'redis';
 import { TicketReserveDto } from './dto/ticket-reserve.dto';
 import { UnsetReserveDto } from './dto/unset-reserve.dto';
 import { TicketReserveListDto } from './dto/ticket-reserve-list.dto';
+import { InitReserveDto } from './dto/init-reserve.dto';
 
 @Injectable()
 export class TicketService {
@@ -189,6 +190,12 @@ export class TicketService {
       return 1;
     } else {
       return 0;
+    }
+  }
+
+  async reserve_seat_init(initReserveDtoArray: InitReserveDto[]) {
+    for (const initReserveDto of initReserveDtoArray) {
+      console.log(initReserveDto);
     }
   }
 }
