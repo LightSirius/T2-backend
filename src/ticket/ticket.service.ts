@@ -195,7 +195,13 @@ export class TicketService {
 
   async reserve_seat_init(initReserveDtoArray: InitReserveDto[]) {
     for (const initReserveDto of initReserveDtoArray) {
-      console.log(initReserveDto);
+      for (let i = 1; i <= initReserveDto.seat_count; i++) {
+        this.redis.hSet(
+          `show_reserve:${initReserveDto.show_id}`,
+          `${initReserveDto.area_id}-${i}`,
+          Date.now() + 180000,
+        );
+      }
     }
   }
 }
