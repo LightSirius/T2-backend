@@ -14,6 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { TicketReserveDto } from './dto/ticket-reserve.dto';
 import { UnsetReserveDto } from './dto/unset-reserve.dto';
 import { TicketReserveListDto } from './dto/ticket-reserve-list.dto';
+import { InitReserveDto } from './dto/init-reserve.dto';
 
 @ApiTags('Ticket API')
 @Controller('ticket')
@@ -98,5 +99,10 @@ export class TicketController {
   @Post('/fix_reserve_hash')
   fix_reserve_hash(@Body() ticketReserveDto: TicketReserveDto) {
     return this.ticketService.fix_reserve_hash(ticketReserveDto);
+  }
+
+  @Post('/reserve_seat_init')
+  reserve_seat_init(@Body() initReserveDto: InitReserveDto[]) {
+    return this.ticketService.reserve_seat_init(initReserveDto);
   }
 }
