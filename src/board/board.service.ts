@@ -183,28 +183,31 @@ export class BoardService {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
     }
 
-    await this.update(id, boardModifyDto);
+    boardModifyDto.user_name = guard.name;
+
+    const change_board = await this.update(id, boardModifyDto);
+
     await this.redis.hDel('board_detail_list', id.toString());
 
     const es_result = await this.elasticsearchService.update({
       index: 'board_community',
-      id: board.board_id.toString(),
+      id: change_board.board_id.toString(),
       doc: {
-        board_id: board.board_id,
-        board_title: board.board_title,
-        board_contents: board.board_contents,
-        board_type: board.board_type,
-        user_name: board.user_name,
+        board_id: change_board.board_id,
+        board_title: change_board.board_title,
+        board_contents: change_board.board_contents,
+        board_type: change_board.board_type,
+        user_name: change_board.user_name,
       },
     });
     if (!es_result) {
       throw new HttpException(
         'Generation failed',
-        HttpStatus.FAILED_DEPENDENCY,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    return board.board_id;
+    return change_board.board_id;
   }
 
   async board_check_owner(
