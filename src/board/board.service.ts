@@ -22,9 +22,11 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import {
   BoardEsNewestPayload,
   BoardEsScorePayload,
+  BoardEsSearchPayload,
 } from './payload/board-es.payload';
 import { BoardEsNewestDto } from './dto/board-es-newest.dto';
 import { BoardEsScoreDto } from './dto/board-es-score.dto';
+import { BoardEsSearchDto } from './dto/board-es-search.dto';
 
 @Injectable()
 export class BoardService {
@@ -270,6 +272,76 @@ export class BoardService {
     Logger.log(`board_search_list latency ${Date.now() - now}ms`, `Board`);
 
     return search_list;
+  }
+
+  async board_search_list_es(boardEsSearchDto: BoardEsSearchDto) {
+    if (
+      boardEsSearchDto.search_type != 0 &&
+      boardEsSearchDto.search_string == ''
+    ) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    const now = Date.now();
+
+    const search_sql: BoardEsSearchPayload = {
+      index: 'board_community',
+      size: 20,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                board_type: boardEsSearchDto.board_type,
+              },
+            },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
+
+    switch (boardEsSearchDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must.match.board_title =
+          boardEsSearchDto.search_string;
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsSearchDto.search_string;
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must.match.user_name =
+          boardEsSearchDto.search_string;
+        break;
+      }
+      default: {
+        if (boardEsSearchDto.sort_type == 0) {
+          search_sql.query.bool.must = {
+            match: { board_contents: boardEsSearchDto.search_string },
+          };
+        }
+        break;
+      }
+    }
+
+    if (boardEsSearchDto.sort_type == 1) {
+      search_sql.sort = [{ board_id: { order: 'desc' } }];
+    }
+
+    if (boardEsSearchDto.search_from != 0) {
+      search_sql.from = boardEsSearchDto.search_from;
+    }
+
+    const board_data = await this.elasticsearchService.search(search_sql);
+    Logger.log(
+      `board_search_list_es_newest latency ${Date.now() - now}ms`,
+      `Board`,
+    );
+
+    return board_data;
   }
 
   async board_search_list_es_newest(boardEsNewestDto: BoardEsNewestDto) {
