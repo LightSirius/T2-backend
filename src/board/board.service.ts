@@ -117,7 +117,7 @@ export class BoardService {
     }
 
     if (isEmpty(board_detail_data)) {
-      return null;
+      throw new HttpException('Not Found', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     await this.redis.hSet(
@@ -165,7 +165,7 @@ export class BoardService {
     if (!es_result) {
       throw new HttpException(
         'Generation failed',
-        HttpStatus.FAILED_DEPENDENCY,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
@@ -302,6 +302,13 @@ export class BoardService {
       track_total_hits: true,
     };
 
+    if (
+      boardEsNewestDto.search_type != 0 &&
+      boardEsNewestDto.search_string == ''
+    ) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
     switch (boardEsNewestDto.search_type) {
       case 1: {
         search_sql.query.bool.must.match.board_title =
@@ -319,8 +326,6 @@ export class BoardService {
         break;
       }
       default: {
-        search_sql.query.bool.must.match.board_contents =
-          boardEsNewestDto.search_string;
         break;
       }
     }

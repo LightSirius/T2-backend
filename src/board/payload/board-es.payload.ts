@@ -10,8 +10,8 @@ export class BoardEsNewestPayload {
   ];
   query: {
     bool: {
-      must: {
-        match: {
+      must?: {
+        match?: {
           board_title?: string;
           board_contents?: string;
           user_name?: string;
