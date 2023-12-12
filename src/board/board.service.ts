@@ -336,10 +336,7 @@ export class BoardService {
     }
 
     const board_data = await this.elasticsearchService.search(search_sql);
-    Logger.log(
-      `board_search_list_es_newest latency ${Date.now() - now}ms`,
-      `Board`,
-    );
+    Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
 
     return board_data;
   }
