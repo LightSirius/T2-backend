@@ -303,18 +303,21 @@ export class BoardService {
 
     switch (boardEsSearchDto.search_type) {
       case 1: {
-        search_sql.query.bool.must.match.board_title =
-          boardEsSearchDto.search_string;
+        search_sql.query.bool.must = {
+          match: { board_title: boardEsSearchDto.search_string },
+        };
         break;
       }
       case 2: {
-        search_sql.query.bool.must.match.board_contents =
-          boardEsSearchDto.search_string;
+        search_sql.query.bool.must = {
+          match: { board_contents: boardEsSearchDto.search_string },
+        };
         break;
       }
       case 3: {
-        search_sql.query.bool.must.match.user_name =
-          boardEsSearchDto.search_string;
+        search_sql.query.bool.must = {
+          match: { user_name: boardEsSearchDto.search_string },
+        };
         break;
       }
       default: {
