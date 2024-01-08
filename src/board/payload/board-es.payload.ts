@@ -86,3 +86,11 @@ export class BoardEsScorePayload {
   };
   track_total_hits: boolean;
 }
+
+export class BoardListPayload {
+  board_id: number;
+  board_title: string;
+  board_contents: string;
+  board_type: number;
+  user_name: string;
+}
