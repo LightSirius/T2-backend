@@ -12,6 +12,9 @@ export class BoardDetailDto {
   board_title: string;
   board_contents: string;
   user_name: string;
+  comment_count?: number;
+  view_count?: number;
+  recommend_count?: number;
   update_date: Date;
   near_board_list: NearBoardList;
 }
