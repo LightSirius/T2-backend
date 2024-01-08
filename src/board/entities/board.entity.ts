@@ -36,6 +36,15 @@ export class Board {
   @Column()
   board_contents: string;
 
+  @Column({ default: 0 })
+  comment_count: number;
+
+  @Column({ default: 0 })
+  view_count: number;
+
+  @Column({ default: 0 })
+  recommend_count: number;
+
   @CreateDateColumn()
   create_date: Date;
 
