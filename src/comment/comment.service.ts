@@ -24,20 +24,22 @@ export class CommentService {
     return this.commentRepository.find();
   }
 
-  async findOne(comment_id: number) {
+  findOne(comment_id: number) {
     return this.commentRepository.findOneBy({ comment_id });
   }
 
   async update(id: number, updateCommentDto: UpdateCommentDto) {
     const comment = await this.findOne(id);
-    return await this.commentRepository.save({
+    return this.commentRepository.save({
       ...comment,
       ...updateCommentDto,
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async remove(comment_id: number) {
+    const comment = await this.findOne(comment_id);
+    comment.is_delete = true;
+    return await this.commentRepository.save(comment);
   }
 
   async comment_insert(
