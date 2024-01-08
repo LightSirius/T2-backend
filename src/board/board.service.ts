@@ -23,10 +23,15 @@ import {
   BoardEsNewestPayload,
   BoardEsScorePayload,
   BoardEsSearchPayload,
+  BoardListPayload,
 } from './payload/board-es.payload';
 import { BoardEsNewestDto } from './dto/board-es-newest.dto';
 import { BoardEsScoreDto } from './dto/board-es-score.dto';
 import { BoardEsSearchDto } from './dto/board-es-search.dto';
+import {
+  GetGetResult,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 @Injectable()
 export class BoardService {
@@ -128,6 +133,31 @@ export class BoardService {
       JSON.stringify(board_detail_data),
     );
 
+    await this.elasticsearchService.update({
+      index: 'board_community',
+      id: board_id.toString(),
+      script: {
+        source: 'ctx._source.view_count += 1',
+      },
+    });
+
+    const es_get_result: GetGetResult<{
+      board_id: number;
+      board_title: string;
+      board_contents: string;
+      board_type: string;
+      user_name: string;
+      comment_count?: number;
+      view_count?: number;
+      recommend_count?: number;
+    }> = await this.elasticsearchService.get({
+      index: 'board_community',
+      id: board_id.toString(),
+    });
+
+    board_detail_data.view_count = es_get_result._source.view_count;
+    board_detail_data.comment_count = es_get_result._source.comment_count;
+    board_detail_data.recommend_count = es_get_result._source.recommend_count;
     board_detail_data.near_board_list = {
       ...(await this.entityManager.query(
         'select board_id, board_type, board_title, create_date ' +
@@ -339,6 +369,8 @@ export class BoardService {
     }
 
     const board_data = await this.elasticsearchService.search(search_sql);
+    const board_data: SearchResponse =
+      await this.elasticsearchService.search(search_sql);
     Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
 
     return board_data;
