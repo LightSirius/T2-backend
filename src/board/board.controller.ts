@@ -18,6 +18,7 @@ import { BoardInsertDto } from './dto/board-insert.dto';
 import { BoardSearchDto } from './dto/board-search.dto';
 import { BoardEsNewestDto } from './dto/board-es-newest.dto';
 import { BoardEsScoreDto } from './dto/board-es-score.dto';
+import { BoardEsSearchDto } from './dto/board-es-search.dto';
 
 @ApiTags('Board API')
 @Controller('board')
@@ -91,6 +92,11 @@ export class BoardController {
   @Post('search')
   board_search_list(@Body() boardSearchDto: BoardSearchDto) {
     return this.boardService.board_search_list(boardSearchDto);
+  }
+
+  @Post('search-es')
+  board_search_list_es(@Body() boardEsSearchDto: BoardEsSearchDto) {
+    return this.boardService.board_search_list_es(boardEsSearchDto);
   }
 
   @Post('search-es-newest')

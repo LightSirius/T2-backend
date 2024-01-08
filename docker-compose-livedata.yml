@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app-livedata:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "3000:3000"
+    command:
+      - bash
+      - -c
+      - |
+        /usr/src/app/wait-for-it.sh db:5432 -t 10
+        npm run start:dev
+    volumes:
+      - ./src:/usr/src/app/src
