@@ -368,7 +368,6 @@ export class BoardService {
       search_sql.from = boardEsSearchDto.search_from;
     }
 
-    const board_data = await this.elasticsearchService.search(search_sql);
     const board_data: SearchResponse =
       await this.elasticsearchService.search(search_sql);
     Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
