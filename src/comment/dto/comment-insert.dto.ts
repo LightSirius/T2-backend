@@ -8,9 +8,6 @@ export class CommentInsertDto {
   @ApiProperty({ description: 'comment_reply_id' })
   @IsNumber()
   comment_reply_id: number;
-  @ApiProperty({ description: 'user_uuid' })
-  @IsString()
-  user_uuid: string;
   @ApiProperty({ description: 'comment_contents' })
   @IsString()
   comment_contents: string;
