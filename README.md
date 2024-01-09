@@ -19,6 +19,8 @@
 Ticketing Service Project T2 repository.
 Dev for study
 
+this service need elk -> https://github.com/sherifabdlnaby/elastdocker
+
 
 ## Installation
 
