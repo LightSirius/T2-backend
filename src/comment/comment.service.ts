@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,9 @@ import { Comment } from './entities/comment.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { CommentInsertDto } from './dto/comment-insert.dto';
+import { GetGetResult } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { CommentDeleteDto } from './dto/comment-delete.dto';
 
 @Injectable()
 export class CommentService {
@@ -13,6 +16,7 @@ export class CommentService {
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
     private readonly entityManager: EntityManager,
+    private readonly elasticsearchService: ElasticsearchService,
   ) {}
 
   create(createCommentDto: CreateCommentDto) {
@@ -54,7 +58,92 @@ export class CommentService {
       comment.comment_reply_id == 0
         ? comment.comment_id
         : comment.comment_reply_id;
-    return await this.entityManager.save(comment);
+    const comment_result = await this.entityManager.save(comment);
+    if (comment_result) {
+      const es_get_result: GetGetResult<{
+        board_id: number;
+        board_title: string;
+        board_contents: string;
+        board_type: string;
+        user_name: string;
+        comment_count?: number;
+        view_count?: number;
+        recommend_count?: number;
+      }> = await this.elasticsearchService.get({
+        index: 'board_community',
+        id: commentInsertDto.board_id.toString(),
+      });
+
+      const es_result = await this.elasticsearchService.update({
+        if_primary_term: 1,
+        if_seq_no: es_get_result._seq_no,
+        index: 'board_community',
+        id: commentInsertDto.board_id.toString(),
+        doc: {
+          comment_count: await this.comment_list_count(
+            commentInsertDto.board_id,
+          ),
+        },
+      });
+
+      if (es_result) {
+        return comment_result;
+      }
+    }
+  }
+
+  async comment_check_owner(comment_id: number, guard: { uuid: string }) {
+    const comment = await this.findOne(comment_id);
+    return comment.user_uuid == guard.uuid ? comment : null;
+  }
+
+  async comment_delete(
+    commentDeleteDto: CommentDeleteDto,
+    guard: { uuid: string },
+  ) {
+    const comment = await this.comment_check_owner(
+      commentDeleteDto.comment_id,
+      guard,
+    );
+    if (!comment) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    const comment_result = await this.remove(commentDeleteDto.comment_id);
+    if (comment_result) {
+      const es_get_result: GetGetResult<{
+        board_id: number;
+        board_title: string;
+        board_contents: string;
+        board_type: string;
+        user_name: string;
+        comment_count?: number;
+        view_count?: number;
+        recommend_count?: number;
+      }> = await this.elasticsearchService.get({
+        index: 'board_community',
+        id: commentDeleteDto.board_id.toString(),
+      });
+
+      const comment_count = await this.comment_list_count(
+        commentDeleteDto.board_id,
+      );
+      const es_result = await this.elasticsearchService.update({
+        if_primary_term: 1,
+        if_seq_no: es_get_result._seq_no,
+        index: 'board_community',
+        id: commentDeleteDto.board_id.toString(),
+        doc: {
+          comment_count: comment_count,
+        },
+      });
+
+      if (es_result) {
+        return comment_count;
+      }
+    }
+
+    return null;
   }
 
   async comment_list(board_id: number, page: number) {

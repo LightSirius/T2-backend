@@ -15,6 +15,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CommentInsertDto } from './dto/comment-insert.dto';
+import { CommentDeleteDto } from './dto/comment-delete.dto';
 
 @ApiTags('Comment API')
 @Controller('comment')
@@ -55,6 +56,19 @@ export class CommentController {
   ) {
     return await this.commentService.comment_insert(
       commentInsertDto,
+      guard.user,
+    );
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('delete')
+  async comment_delete(
+    @Body() commentDeleteDto: CommentDeleteDto,
+    @Request() guard,
+  ) {
+    return await this.commentService.comment_delete(
+      commentDeleteDto,
       guard.user,
     );
   }
