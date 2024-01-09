@@ -33,6 +33,9 @@ export class Comment {
   @Column()
   comment_contents: string;
 
+  @Column({ default: false })
+  is_delete: boolean;
+
   @CreateDateColumn()
   create_date: Date;
 

@@ -24,20 +24,22 @@ export class CommentService {
     return this.commentRepository.find();
   }
 
-  async findOne(comment_id: number) {
+  findOne(comment_id: number) {
     return this.commentRepository.findOneBy({ comment_id });
   }
 
   async update(id: number, updateCommentDto: UpdateCommentDto) {
     const comment = await this.findOne(id);
-    return await this.commentRepository.save({
+    return this.commentRepository.save({
       ...comment,
       ...updateCommentDto,
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async remove(comment_id: number) {
+    const comment = await this.findOne(comment_id);
+    comment.is_delete = true;
+    return await this.commentRepository.save(comment);
   }
 
   async comment_insert(
@@ -75,6 +77,7 @@ export class CommentService {
           'comment.comment_id AS comment_id',
           'comment.comment_reply_id AS comment_reply_id',
           'comment.comment_contents AS comment_contents',
+          'comment.is_delete AS is_delete',
           'comment.create_date AS create_date',
           'user.user_name AS user_name',
         ])
@@ -88,7 +91,7 @@ export class CommentService {
 
   async comment_list_count(board_id: number) {
     return await this.commentRepository.count({
-      where: { board_id: board_id },
+      where: { board_id: board_id, is_delete: false },
     });
   }
 }
