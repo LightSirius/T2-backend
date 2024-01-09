@@ -1,13 +1,14 @@
 import { Logger, Module } from '@nestjs/common';
 import { createClient } from 'redis';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [
     {
       provide: 'REDIS_CLIENT',
-      useFactory: async () => {
+      useFactory: async (configService: ConfigService) => {
         const client = createClient({
-          url: 'redis://predixy:7500',
+          url: configService.getOrThrow('REDIS_URL'),
           socket: {
             keepAlive: 1000,
             reconnectStrategy: (retries: number, cause: Error) => {
@@ -26,6 +27,7 @@ import { createClient } from 'redis';
         await client.connect();
         return client;
       },
+      inject: [ConfigService],
     },
   ],
   exports: ['REDIS_CLIENT'],

@@ -19,6 +19,19 @@ import { BoardModifyDto } from './dto/board-modify.dto';
 import { isEmpty } from '../utils/utill';
 import { BoardSearchDto } from './dto/board-search.dto';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import {
+  BoardEsNewestPayload,
+  BoardEsScorePayload,
+  BoardEsSearchPayload,
+  BoardListPayload,
+} from './payload/board-es.payload';
+import { BoardEsNewestDto } from './dto/board-es-newest.dto';
+import { BoardEsScoreDto } from './dto/board-es-score.dto';
+import { BoardEsSearchDto } from './dto/board-es-search.dto';
+import {
+  GetGetResult,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 @Injectable()
 export class BoardService {
@@ -111,7 +124,7 @@ export class BoardService {
     }
 
     if (isEmpty(board_detail_data)) {
-      return null;
+      throw new HttpException('Not Found', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     await this.redis.hSet(
@@ -120,6 +133,31 @@ export class BoardService {
       JSON.stringify(board_detail_data),
     );
 
+    await this.elasticsearchService.update({
+      index: 'board_community',
+      id: board_id.toString(),
+      script: {
+        source: 'ctx._source.view_count += 1',
+      },
+    });
+
+    const es_get_result: GetGetResult<{
+      board_id: number;
+      board_title: string;
+      board_contents: string;
+      board_type: string;
+      user_name: string;
+      comment_count?: number;
+      view_count?: number;
+      recommend_count?: number;
+    }> = await this.elasticsearchService.get({
+      index: 'board_community',
+      id: board_id.toString(),
+    });
+
+    board_detail_data.view_count = es_get_result._source.view_count;
+    board_detail_data.comment_count = es_get_result._source.comment_count;
+    board_detail_data.recommend_count = es_get_result._source.recommend_count;
     board_detail_data.near_board_list = {
       ...(await this.entityManager.query(
         'select board_id, board_type, board_title, create_date ' +
@@ -145,13 +183,31 @@ export class BoardService {
       user_name: guard.name,
       ...boardInsertDto,
     });
+    const es_result = await this.elasticsearchService.create({
+      index: 'board_community',
+      id: board.board_id.toString(),
+      document: {
+        board_id: board.board_id,
+        board_title: board.board_title,
+        board_contents: board.board_contents,
+        board_type: board.board_type,
+        user_name: board.user_name,
+      },
+    });
+    if (!es_result) {
+      throw new HttpException(
+        'Generation failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     return board.board_id;
   }
 
   async board_modify(
     id: number,
     boardModifyDto: BoardModifyDto,
-    guard: { uuid: string },
+    guard: { uuid: string; name: string },
   ) {
     const board = await this.board_check_owner(id, guard);
 
@@ -159,10 +215,31 @@ export class BoardService {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
     }
 
-    await this.update(id, boardModifyDto);
+    boardModifyDto.user_name = guard.name;
+
+    const change_board = await this.update(id, boardModifyDto);
+
     await this.redis.hDel('board_detail_list', id.toString());
 
-    return board.board_id;
+    const es_result = await this.elasticsearchService.update({
+      index: 'board_community',
+      id: change_board.board_id.toString(),
+      doc: {
+        board_id: change_board.board_id,
+        board_title: change_board.board_title,
+        board_contents: change_board.board_contents,
+        board_type: change_board.board_type,
+        user_name: change_board.user_name,
+      },
+    });
+    if (!es_result) {
+      throw new HttpException(
+        'Generation failed',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return change_board.board_id;
   }
 
   async board_check_owner(
@@ -227,9 +304,81 @@ export class BoardService {
     return search_list;
   }
 
-  async board_search_list_es(boardSearchDto: BoardSearchDto) {
+  async board_search_list_es(boardEsSearchDto: BoardEsSearchDto) {
+    if (
+      boardEsSearchDto.search_type != 0 &&
+      boardEsSearchDto.search_string == ''
+    ) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
     const now = Date.now();
-    const board_data = await this.elasticsearchService.search({
+
+    const search_sql: BoardEsSearchPayload = {
+      index: 'board_community',
+      size: 20,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                board_type: boardEsSearchDto.board_type,
+              },
+            },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
+
+    switch (boardEsSearchDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must = {
+          match: { board_title: boardEsSearchDto.search_string },
+        };
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must = {
+          match: { board_contents: boardEsSearchDto.search_string },
+        };
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must = {
+          match: { user_name: boardEsSearchDto.search_string },
+        };
+        break;
+      }
+      default: {
+        if (boardEsSearchDto.sort_type == 0) {
+          search_sql.query.bool.must = {
+            match: { board_contents: boardEsSearchDto.search_string },
+          };
+        }
+        break;
+      }
+    }
+
+    if (boardEsSearchDto.sort_type == 1) {
+      search_sql.sort = [{ board_id: { order: 'desc' } }];
+    }
+
+    if (boardEsSearchDto.search_from != 0) {
+      search_sql.from = boardEsSearchDto.search_from;
+    }
+
+    const board_data: SearchResponse =
+      await this.elasticsearchService.search(search_sql);
+    Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
+
+    return board_data;
+  }
+
+  async board_search_list_es_newest(boardEsNewestDto: BoardEsNewestDto) {
+    const now = Date.now();
+
+    const search_sql: BoardEsNewestPayload = {
       index: 'board_community',
       size: 20,
       sort: [
@@ -242,23 +391,116 @@ export class BoardService {
       query: {
         bool: {
           must: {
-            match: {
-              board_title: '글',
-            },
+            match: {},
           },
           filter: [
             {
               term: {
-                board_type: '1',
+                board_type: boardEsNewestDto.board_type,
               },
             },
           ],
         },
       },
-      search_after: ['173'],
       track_total_hits: true,
-    });
-    Logger.log(`board_search_list_es latency ${Date.now() - now}ms`, `Board`);
+    };
+
+    if (
+      boardEsNewestDto.search_type != 0 &&
+      boardEsNewestDto.search_string == ''
+    ) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    switch (boardEsNewestDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must.match.board_title =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must.match.user_name =
+          boardEsNewestDto.search_string;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+    if (boardEsNewestDto.search_after != 0) {
+      search_sql.search_after = [boardEsNewestDto.search_after];
+    }
+
+    const board_data = await this.elasticsearchService.search(search_sql);
+    Logger.log(
+      `board_search_list_es_newest latency ${Date.now() - now}ms`,
+      `Board`,
+    );
+
+    return board_data;
+  }
+
+  async board_search_list_es_score(boardEsScoreDto: BoardEsScoreDto) {
+    const now = Date.now();
+
+    const search_sql: BoardEsScorePayload = {
+      index: 'board_community',
+      size: 20,
+      query: {
+        bool: {
+          must: {
+            match: {},
+          },
+          filter: [
+            {
+              term: {
+                board_type: boardEsScoreDto.board_type,
+              },
+            },
+          ],
+        },
+      },
+      track_total_hits: true,
+    };
+
+    switch (boardEsScoreDto.search_type) {
+      case 1: {
+        search_sql.query.bool.must.match.board_title =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      case 2: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      case 3: {
+        search_sql.query.bool.must.match.user_name =
+          boardEsScoreDto.search_string;
+        break;
+      }
+      default: {
+        search_sql.query.bool.must.match.board_contents =
+          boardEsScoreDto.search_string;
+        break;
+      }
+    }
+
+    if (boardEsScoreDto.search_from != 0) {
+      search_sql.from = boardEsScoreDto.search_from;
+    }
+
+    const board_data = await this.elasticsearchService.search(search_sql);
+    Logger.log(
+      `board_search_list_es_score latency ${Date.now() - now}ms`,
+      `Board`,
+    );
 
     return board_data;
   }
